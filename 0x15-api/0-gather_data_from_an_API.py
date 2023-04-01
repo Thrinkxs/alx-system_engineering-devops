@@ -1,14 +1,30 @@
 #!/usr/bin/python3
-"""Returns to-do list information for a given employee ID."""
+'''Using a REST API, for a given employee ID,
+returns information about his/her TODO list progress'''
+
 import requests
 import sys
 
 if __name__ == "__main__":
-    url = "https://jsonplaceholder.typicode.com/"
-    user = requests.get(url + "users/{}".format(sys.argv[1])).json()
-    todos = requests.get(url + "todos", params={"userId": sys.argv[1]}).json()
+    userId = sys.argv[1]
+    comp_todos_title = []
+    todos_count = 0
+    user_url = "https://jsonplaceholder.typicode.com/users/{}".format(userId)
+    todos_url = "https://jsonplaceholder.typicode.com/todos"
 
-    completed = [t.get("title") for t in todos if t.get("completed") is True]
+    name = requests.get(user_url).json().get("name")
+
+    r = requests.get(todos_url)
+    res = r.json()
+
+    for todo in res:
+        if todo.get("userId") == int(userId):
+            todos_count += 1
+            if todo.get("completed"):
+                comp_todos_title.append(todo.get("title"))
+
     print("Employee {} is done with tasks({}/{}):".format(
-        user.get("name"), len(completed), len(todos)))
-    [print("\t {}".format(c)) for c in completed]
+                                                        name,
+                                                        len(comp_todos_title),
+                                                        todos_count))
+    [print("\t {}".format(title)) for title in comp_todos_title]
